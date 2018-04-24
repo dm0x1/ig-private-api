@@ -4,6 +4,7 @@ namespace InstagramAPI;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\HandlerStack;
 use InstagramAPI\Exception\InstagramException;
 use InstagramAPI\Exception\LoginRequiredException;
@@ -216,8 +217,8 @@ class Client
     public function getToken()
     {
         $cookie = $this->getCookie('csrftoken', 'i.instagram.com');
-        if ($cookie === null || $cookie->getExpires() <= time()) {
-            return; // Ugh, StyleCI doesn't allow "return null;" for clarity. ;)
+        if ($cookie === null || $cookie->getValue() === '') {
+            return null;
         }
 
         return $cookie->getValue();
@@ -230,7 +231,7 @@ class Client
      * @param string|null $domain (optional) Require a specific domain match.
      * @param string|null $path   (optional) Require a specific path match.
      *
-     * @return \GuzzleHttp\Cookie\SetCookie|null A cookie if found, otherwise NULL.
+     * @return \GuzzleHttp\Cookie\SetCookie|null A cookie if found and non-expired, otherwise NULL.
      */
     public function getCookie(
         $name,
@@ -239,12 +240,20 @@ class Client
     {
         $foundCookie = null;
         if ($this->_cookieJar instanceof CookieJar) {
+            /** @var SetCookie $cookie */
             foreach ($this->_cookieJar->getIterator() as $cookie) {
-                if ($cookie->getName() == $name
-                    && ($domain === null || $cookie->getDomain() == $domain)
-                    && ($path === null || $cookie->getPath() == $path)) {
+                if ($cookie->getName() === $name
+                    && !$cookie->isExpired()
+                    && ($domain === null || $cookie->matchesDomain($domain))
+                    && ($path === null || $cookie->matchesPath($path))) {
+                    // Loop-"break" is omitted intentionally, because we might
+                    // have more than one cookie with the same name, so we will
+                    // return the LAST one. This is necessary because Instagram
+                    // has changed their cookie domain from `i.instagram.com` to
+                    // `.instagram.com` and we want the *most recent* cookie.
+                    // Guzzle's `CookieJar::setCookie()` always places the most
+                    // recently added/modified cookies at the *end* of array.
                     $foundCookie = $cookie;
-                    break;
                 }
             }
         }
