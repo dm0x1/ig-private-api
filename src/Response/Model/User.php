@@ -70,10 +70,12 @@ use InstagramAPI\AutoPropertyMapper;
  * @method int getMaxNumLinkedEntitiesInBio()
  * @method int getMediaCount()
  * @method mixed getMutualFollowersCount()
+ * @method Nametag getNametag()
  * @method string getNationalNumber()
  * @method mixed getNeedsEmailConfirm()
  * @method string getPageId()
  * @method mixed getPageName()
+ * @method bool getPermission()
  * @method string getPhoneNumber()
  * @method string getPk()
  * @method mixed getProfileContext()
@@ -85,6 +87,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method string getPublicPhoneCountryCode()
  * @method string getPublicPhoneNumber()
  * @method string getReelAutoArchive()
+ * @method mixed getSchool()
  * @method bool getScreenshotted()
  * @method mixed getSearchSocialContext()
  * @method bool getShowBestiesBadge()
@@ -162,10 +165,12 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isMaxNumLinkedEntitiesInBio()
  * @method bool isMediaCount()
  * @method bool isMutualFollowersCount()
+ * @method bool isNametag()
  * @method bool isNationalNumber()
  * @method bool isNeedsEmailConfirm()
  * @method bool isPageId()
  * @method bool isPageName()
+ * @method bool isPermission()
  * @method bool isPhoneNumber()
  * @method bool isPk()
  * @method bool isProfileContext()
@@ -177,6 +182,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isPublicPhoneCountryCode()
  * @method bool isPublicPhoneNumber()
  * @method bool isReelAutoArchive()
+ * @method bool isSchool()
  * @method bool isScreenshotted()
  * @method bool isSearchSocialContext()
  * @method bool isShowBestiesBadge()
@@ -254,10 +260,12 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setMaxNumLinkedEntitiesInBio(int $value)
  * @method $this setMediaCount(int $value)
  * @method $this setMutualFollowersCount(mixed $value)
+ * @method $this setNametag(Nametag $value)
  * @method $this setNationalNumber(string $value)
  * @method $this setNeedsEmailConfirm(mixed $value)
  * @method $this setPageId(string $value)
  * @method $this setPageName(mixed $value)
+ * @method $this setPermission(bool $value)
  * @method $this setPhoneNumber(string $value)
  * @method $this setPk(string $value)
  * @method $this setProfileContext(mixed $value)
@@ -269,6 +277,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setPublicPhoneCountryCode(string $value)
  * @method $this setPublicPhoneNumber(string $value)
  * @method $this setReelAutoArchive(string $value)
+ * @method $this setSchool(mixed $value)
  * @method $this setScreenshotted(bool $value)
  * @method $this setSearchSocialContext(mixed $value)
  * @method $this setShowBestiesBadge(bool $value)
@@ -346,10 +355,12 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetMaxNumLinkedEntitiesInBio()
  * @method $this unsetMediaCount()
  * @method $this unsetMutualFollowersCount()
+ * @method $this unsetNametag()
  * @method $this unsetNationalNumber()
  * @method $this unsetNeedsEmailConfirm()
  * @method $this unsetPageId()
  * @method $this unsetPageName()
+ * @method $this unsetPermission()
  * @method $this unsetPhoneNumber()
  * @method $this unsetPk()
  * @method $this unsetProfileContext()
@@ -361,6 +372,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetPublicPhoneCountryCode()
  * @method $this unsetPublicPhoneNumber()
  * @method $this unsetReelAutoArchive()
+ * @method $this unsetSchool()
  * @method $this unsetScreenshotted()
  * @method $this unsetSearchSocialContext()
  * @method $this unsetShowBestiesBadge()
@@ -384,6 +396,7 @@ class User extends AutoPropertyMapper
         'is_favorite'                         => 'bool',
         'profile_pic_url'                     => 'string',
         'profile_pic_id'                      => 'string',
+        'permission'                          => 'bool',
         'full_name'                           => 'string',
         'user_id'                             => 'string',
         'pk'                                  => 'string',
@@ -477,5 +490,7 @@ class User extends AutoPropertyMapper
         'is_video_creator'                    => 'bool',
         'show_besties_badge'                  => 'bool',
         'screenshotted'                       => 'bool',
+        'nametag'                             => 'Nametag',
+        'school'                              => '',
     ];
 }

@@ -3,7 +3,7 @@
 namespace InstagramAPI;
 
 /**
- * Instagram's Private API v4.
+ * Instagram's Private API v5.
  *
  * TERMS OF USE:
  * - This code is in no way affiliated with, authorized, maintained, sponsored
@@ -584,6 +584,159 @@ class Instagram implements ExperimentsInterface
     }
 
     /**
+     * Request a new security code SMS for a Two Factor login account.
+     *
+     * NOTE: You should first attempt to `login()` which will automatically send
+     * you a two factor SMS. This function is just for asking for a new SMS if
+     * the old code has expired.
+     *
+     * NOTE: Instagram can only send you a new code every 60 seconds.
+     *
+     * @param string $username            Your Instagram username.
+     * @param string $password            Your Instagram password.
+     * @param string $twoFactorIdentifier Two factor identifier, obtained in
+     *                                    `login()` response.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\TwoFactorLoginSMSResponse
+     */
+    public function sendTwoFactorLoginSMS(
+        $username,
+        $password,
+        $twoFactorIdentifier)
+    {
+        if (empty($username) || empty($password)) {
+            throw new \InvalidArgumentException('You must provide a username and password to sendTwoFactorLoginSMS().');
+        }
+        if (empty($twoFactorIdentifier)) {
+            throw new \InvalidArgumentException('You must provide a two-factor identifier to sendTwoFactorLoginSMS().');
+        }
+
+        // Switch the currently active user/pass if the details are different.
+        // NOTE: The password IS NOT actually necessary for THIS
+        // endpoint, but this extra step helps people who statelessly embed the
+        // library directly into a webpage, so they can `sendTwoFactorLoginSMS()`
+        // on their second page load without having to begin any new `login()`
+        // call (since they did that in their previous webpage's library calls).
+        if ($this->username !== $username || $this->password !== $password) {
+            $this->_setUser($username, $password);
+        }
+
+        return $this->ig->request('accounts/send_two_factor_login_sms/')
+            ->setNeedsAuth(false)
+            ->addPost('two_factor_identifier', $twoFactorIdentifier)
+            ->addPost('username', $username)
+            ->addPost('device_id', $this->ig->device_id)
+            ->addPost('guid', $this->ig->uuid)
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->getResponse(new Response\TwoFactorLoginSMSResponse());
+    }
+
+    /**
+     * Request information about available password recovery methods for an account.
+     *
+     * This will tell you things such as whether SMS or EMAIL-based recovery is
+     * available for the given account name.
+     *
+     * `WARNING:` You can call this function without having called `login()`,
+     * but be aware that a user database entry will be created for every
+     * username you try to look up. This is ONLY meant for recovering your OWN
+     * accounts.
+     *
+     * @param string $username Your Instagram username.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\UsersLookupResponse
+     */
+    public function userLookup(
+        $username)
+    {
+        // Set active user (without pwd), and create database entry if new user.
+        $this->_setUserWithoutPassword($username);
+
+        return $this->request('users/lookup/')
+            ->setNeedsAuth(false)
+            ->addPost('q', $username)
+            ->addPost('directly_sign_in', true)
+            ->addPost('username', $username)
+            ->addPost('device_id', $this->device_id)
+            ->addPost('guid', $this->uuid)
+            ->addPost('_csrftoken', $this->client->getToken())
+            ->getResponse(new Response\UsersLookupResponse());
+    }
+
+    /**
+     * Request a recovery EMAIL to get back into your account.
+     *
+     * `WARNING:` You can call this function without having called `login()`,
+     * but be aware that a user database entry will be created for every
+     * username you try to look up. This is ONLY meant for recovering your OWN
+     * accounts.
+     *
+     * @param string $username Your Instagram username.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\RecoveryResponse
+     */
+    public function sendRecoveryEmail(
+        $username)
+    {
+        // Set active user (without pwd), and create database entry if new user.
+        $this->_setUserWithoutPassword($username);
+
+        // Verify that they can use the recovery email option.
+        $userLookup = $this->userLookup($username);
+        if (!$userLookup->getCanEmailReset()) {
+            throw new \InstagramAPI\Exception\InternalException('Email recovery is not available, since your account lacks a verified email address.');
+        }
+
+        return $this->request('accounts/send_recovery_flow_email/')
+            ->setNeedsAuth(false)
+            ->addPost('query', $username)
+            ->addPost('adid', $this->advertising_id)
+            ->addPost('device_id', $this->device_id)
+            ->addPost('guid', $this->uuid)
+            ->addPost('_csrftoken', $this->client->getToken())
+            ->getResponse(new Response\RecoveryResponse());
+    }
+
+    /**
+     * Request a recovery SMS to get back into your account.
+     *
+     * `WARNING:` You can call this function without having called `login()`,
+     * but be aware that a user database entry will be created for every
+     * username you try to look up. This is ONLY meant for recovering your OWN
+     * accounts.
+     *
+     * @param string $username Your Instagram username.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\RecoveryResponse
+     */
+    public function sendRecoverySMS(
+        $username)
+    {
+        // Set active user (without pwd), and create database entry if new user.
+        $this->_setUserWithoutPassword($username);
+
+        // Verify that they can use the recovery SMS option.
+        $userLookup = $this->userLookup($username);
+        if (!$userLookup->getHasValidPhone() || !$userLookup->getCanSmsReset()) {
+            throw new \InstagramAPI\Exception\InternalException('SMS recovery is not available, since your account lacks a verified phone number.');
+        }
+
+        return $this->request('users/lookup_phone/')
+            ->setNeedsAuth(false)
+            ->addPost('query', $username)
+            ->addPost('_csrftoken', $this->client->getToken())
+            ->getResponse(new Response\RecoveryResponse());
+    }
+
+    /**
      * Set the active account for the class instance.
      *
      * We can call this multiple times to switch between multiple accounts.
@@ -686,6 +839,49 @@ class Instagram implements ExperimentsInterface
         // Must be done last here, so that isMaybeLoggedIn is properly updated!
         // NOTE: If we generated a new device we start a new cookie jar.
         $this->client->updateFromCurrentSettings($resetCookieJar);
+    }
+
+    /**
+     * Set the active account for the class instance, without knowing password.
+     *
+     * This internal function is used by all unauthenticated pre-login functions
+     * whenever they need to perform unauthenticated requests, such as looking
+     * up a user's account recovery options.
+     *
+     * `WARNING:` A user database entry will be created for every username you
+     * set as the active user, exactly like the normal `_setUser()` function.
+     * This is necessary so that we generate a user-device and data storage for
+     * each given username, which gives us necessary data such as a "device ID"
+     * for the new user's virtual device, to use in various API-call parameters.
+     *
+     * `WARNING:` This function CANNOT be used for performing logins, since
+     * Instagram will validate the password and will reject the missing
+     * password. It is ONLY meant to be used for *RECOVERY* PRE-LOGIN calls that
+     * need device parameters when the user DOESN'T KNOW their password yet.
+     *
+     * @param string $username Your Instagram username.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \InstagramAPI\Exception\InstagramException
+     */
+    protected function _setUserWithoutPassword(
+        $username)
+    {
+        if (empty($username) || !is_string($username)) {
+            throw new \InvalidArgumentException('You must provide a username.');
+        }
+
+        // Switch the currently active user/pass if the username is different.
+        // NOTE: Creates a user database (device) for the user if they're new!
+        // NOTE: Because we don't know their password, we'll mark the user as
+        // having "NOPASSWORD" as pwd. The user will fix that when/if they call
+        // `login()` with the ACTUAL password, which will tell us what it is.
+        // We CANNOT use an empty string since `_setUser()` will not allow that!
+        // NOTE: If the user tries to look up themselves WHILE they are logged
+        // in, we'll correctly NOT call `_setUser()` since they're already set.
+        if ($this->username !== $username) {
+            $this->_setUser($username, 'NOPASSWORD');
+        }
     }
 
     /**
@@ -836,8 +1032,9 @@ class Instagram implements ExperimentsInterface
             $this->internal->getProfileNotice();
             //$this->internal->getMegaphoneLog();
             $this->people->getRecentActivityInbox();
-            $this->internal->getQPFetch();
+            $this->internal->getQPFetch(Constants::SURFACE_PARAM[0]);
             $this->media->getBlockedMedia();
+            $this->internal->getQPFetch(Constants::SURFACE_PARAM[1]);
             $this->discover->getExploreFeed(null, true);
             $this->internal->getFacebookOTA();
         } else {
