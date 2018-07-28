@@ -17,10 +17,10 @@ class Constants
     const SIG_KEY_VERSION = '4';
 
     // User-Agent Constants.
-    const USER_AGENT_LOCALE = 'en_US'; // "language_COUNTRY".
+    const USER_AGENT_LOCALE = 'ru_RU'; // "language_COUNTRY".
 
     // HTTP Protocol Constants.
-    const ACCEPT_LANGUAGE = 'en-US'; // "language-COUNTRY".
+    const ACCEPT_LANGUAGE = 'ru-RU'; // "language-COUNTRY".
     const ACCEPT_ENCODING = 'gzip,deflate';
     const CONTENT_TYPE = 'application/x-www-form-urlencoded; charset=UTF-8';
     const X_FB_HTTP_Engine = 'Liger';
