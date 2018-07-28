@@ -7,14 +7,16 @@ use InstagramAPI\Response;
 /**
  * TimelineFeedResponse.
  *
- * @method mixed getAutoLoadMoreEnabled()
+ * @method bool getAutoLoadMoreEnabled()
  * @method bool getClientFeedChangelistApplied()
+ * @method mixed getClientGapEnforcerMatrix()
+ * @method string getClientSessionId()
  * @method Model\FeedItem[] getFeedItems()
  * @method string getFeedPillText()
- * @method mixed getIsDirectV2Enabled()
+ * @method bool getIsDirectV2Enabled()
  * @method Model\FeedAysf getMegaphone()
  * @method mixed getMessage()
- * @method mixed getMoreAvailable()
+ * @method bool getMoreAvailable()
  * @method string getNextMaxId()
  * @method int getNumResults()
  * @method string getStatus()
@@ -22,6 +24,8 @@ use InstagramAPI\Response;
  * @method Model\_Message[] get_Messages()
  * @method bool isAutoLoadMoreEnabled()
  * @method bool isClientFeedChangelistApplied()
+ * @method bool isClientGapEnforcerMatrix()
+ * @method bool isClientSessionId()
  * @method bool isFeedItems()
  * @method bool isFeedPillText()
  * @method bool isIsDirectV2Enabled()
@@ -33,14 +37,16 @@ use InstagramAPI\Response;
  * @method bool isStatus()
  * @method bool isViewStateVersion()
  * @method bool is_Messages()
- * @method $this setAutoLoadMoreEnabled(mixed $value)
+ * @method $this setAutoLoadMoreEnabled(bool $value)
  * @method $this setClientFeedChangelistApplied(bool $value)
+ * @method $this setClientGapEnforcerMatrix(mixed $value)
+ * @method $this setClientSessionId(string $value)
  * @method $this setFeedItems(Model\FeedItem[] $value)
  * @method $this setFeedPillText(string $value)
- * @method $this setIsDirectV2Enabled(mixed $value)
+ * @method $this setIsDirectV2Enabled(bool $value)
  * @method $this setMegaphone(Model\FeedAysf $value)
  * @method $this setMessage(mixed $value)
- * @method $this setMoreAvailable(mixed $value)
+ * @method $this setMoreAvailable(bool $value)
  * @method $this setNextMaxId(string $value)
  * @method $this setNumResults(int $value)
  * @method $this setStatus(string $value)
@@ -48,6 +54,8 @@ use InstagramAPI\Response;
  * @method $this set_Messages(Model\_Message[] $value)
  * @method $this unsetAutoLoadMoreEnabled()
  * @method $this unsetClientFeedChangelistApplied()
+ * @method $this unsetClientGapEnforcerMatrix()
+ * @method $this unsetClientSessionId()
  * @method $this unsetFeedItems()
  * @method $this unsetFeedPillText()
  * @method $this unsetIsDirectV2Enabled()
@@ -64,14 +72,17 @@ class TimelineFeedResponse extends Response
 {
     const JSON_PROPERTY_MAP = [
         'num_results'                    => 'int',
-        'is_direct_v2_enabled'           => '',
-        'auto_load_more_enabled'         => '',
-        'more_available'                 => '',
+        'client_gap_enforcer_matrix'     => '',
+        'is_direct_v2_enabled'           => 'bool',
+        'auto_load_more_enabled'         => 'bool',
+        'more_available'                 => 'bool',
         'next_max_id'                    => 'string',
         'feed_items'                     => 'Model\FeedItem[]',
         'megaphone'                      => 'Model\FeedAysf',
         'client_feed_changelist_applied' => 'bool',
         'view_state_version'             => 'string',
         'feed_pill_text'                 => 'string',
+        'client_gap_enforcer_matrix'     => '',
+        'client_session_id'              => 'string',
     ];
 }

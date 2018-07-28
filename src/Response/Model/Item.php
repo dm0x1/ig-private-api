@@ -19,6 +19,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method mixed getBoostUnavailableReason()
  * @method mixed getBoostedStatus()
  * @method bool getCanReshare()
+ * @method bool getCanViewMorePreviewComments()
  * @method bool getCanViewerReshare()
  * @method bool getCanViewerSave()
  * @method Caption getCaption()
@@ -123,6 +124,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method StoryHashtag[] getStoryHashtags()
  * @method bool getStoryIsSavedToArchive()
  * @method StoryLocation[] getStoryLocations()
+ * @method mixed getStoryMusicStickers()
  * @method mixed getStoryPollVoterInfos()
  * @method mixed getStoryPolls()
  * @method mixed getStoryProductItems()
@@ -163,6 +165,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isBoostUnavailableReason()
  * @method bool isBoostedStatus()
  * @method bool isCanReshare()
+ * @method bool isCanViewMorePreviewComments()
  * @method bool isCanViewerReshare()
  * @method bool isCanViewerSave()
  * @method bool isCaption()
@@ -267,6 +270,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isStoryHashtags()
  * @method bool isStoryIsSavedToArchive()
  * @method bool isStoryLocations()
+ * @method bool isStoryMusicStickers()
  * @method bool isStoryPollVoterInfos()
  * @method bool isStoryPolls()
  * @method bool isStoryProductItems()
@@ -307,6 +311,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setBoostUnavailableReason(mixed $value)
  * @method $this setBoostedStatus(mixed $value)
  * @method $this setCanReshare(bool $value)
+ * @method $this setCanViewMorePreviewComments(bool $value)
  * @method $this setCanViewerReshare(bool $value)
  * @method $this setCanViewerSave(bool $value)
  * @method $this setCaption(Caption $value)
@@ -411,6 +416,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setStoryHashtags(StoryHashtag[] $value)
  * @method $this setStoryIsSavedToArchive(bool $value)
  * @method $this setStoryLocations(StoryLocation[] $value)
+ * @method $this setStoryMusicStickers(mixed $value)
  * @method $this setStoryPollVoterInfos(mixed $value)
  * @method $this setStoryPolls(mixed $value)
  * @method $this setStoryProductItems(mixed $value)
@@ -451,6 +457,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetBoostUnavailableReason()
  * @method $this unsetBoostedStatus()
  * @method $this unsetCanReshare()
+ * @method $this unsetCanViewMorePreviewComments()
  * @method $this unsetCanViewerReshare()
  * @method $this unsetCanViewerSave()
  * @method $this unsetCaption()
@@ -555,6 +562,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetStoryHashtags()
  * @method $this unsetStoryIsSavedToArchive()
  * @method $this unsetStoryLocations()
+ * @method $this unsetStoryMusicStickers()
  * @method $this unsetStoryPollVoterInfos()
  * @method $this unsetStoryPolls()
  * @method $this unsetStoryProductItems()
@@ -638,6 +646,7 @@ class Item extends AutoPropertyMapper
         'view_count'                       => 'int',
         'viewer_count'                     => 'int',
         'comment_count'                    => 'int',
+        'can_view_more_preview_comments'   => 'bool',
         'has_more_comments'                => 'bool',
         'max_num_visible_preview_comments' => 'int',
         /*
@@ -747,6 +756,7 @@ class Item extends AutoPropertyMapper
         'story_friend_lists'                          => '',
         'story_product_items'                         => '',
         'story_questions'                             => '',
+        'story_music_stickers'                        => '',
         'supports_reel_reactions'                     => 'bool',
         'show_one_tap_fb_share_tooltip'               => 'bool',
         'has_shared_to_fb'                            => 'bool',

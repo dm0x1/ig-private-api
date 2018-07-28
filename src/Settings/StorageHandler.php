@@ -41,6 +41,9 @@ class StorageHandler
         'last_experiments', // Tracks time elapsed since our last experiments refresh.
         'datacenter', // Preferred data center (region-based).
         'presence_disabled', // Whether the presence feature has been disabled by user.
+        'zr_token', // Zero rating token.
+        'zr_expires', // Zero rating token expiration timestamp.
+        'zr_rules', // Zero rating rewrite rules.
     ];
 
     /**
@@ -78,8 +81,12 @@ class StorageHandler
         'ig_android_ad_async_ads_universe',
         'ig_android_direct_inbox_presence',
         'ig_android_direct_thread_presence',
-        'ig_android_mqtt_region_hint_universe',
         'ig_android_rtc_reshare',
+        'ig_android_sidecar_photo_fbupload_universe',
+        'ig_android_fbupload_sidecar_video_universe',
+        'ig_android_skip_get_fbupload_photo_universe',
+        'ig_android_skip_get_fbupload_universe',
+        'ig_android_loom_universe',
     ];
 
     /**
@@ -640,16 +647,7 @@ class StorageHandler
             }
             $filtered[$key] = $experiments[$key];
         }
-        $json = json_encode($filtered);
-        $gzipped = base64_encode(zlib_encode($json, ZLIB_ENCODING_DEFLATE, 9));
-        // We must compare gzipped with double encoded JSON.
-        $doubleJson = json_encode($json);
-        if (strlen($gzipped) < strlen($doubleJson)) {
-            $serialized = 'Z'.$gzipped;
-        } else {
-            $serialized = 'J'.$json;
-        }
-        $this->set('experiments', $serialized);
+        $this->set('experiments', $this->_packJson($filtered));
 
         return $filtered;
     }
@@ -663,34 +661,32 @@ class StorageHandler
      */
     public function getExperiments()
     {
-        $experiments = $this->get('experiments');
-        if ($experiments === null || !strlen($experiments)) {
-            return [];
-        }
-        $format = $experiments[0];
-        $experiments = substr($experiments, 1);
-        switch ($format) {
-            case 'Z':
-                if (($experiments = base64_decode($experiments)) === false
-                    || ($experiments = zlib_decode($experiments)) === false
-                    || ($experiments = json_decode($experiments, true)) === null
-                    || !is_array($experiments)
-                ) {
-                    return [];
-                }
-                break;
-            case 'J':
-                if (($experiments = json_decode($experiments, true)) === null
-                    || !is_array($experiments)
-                ) {
-                    return [];
-                }
-                break;
-            default:
-                $experiments = [];
-        }
+        return $this->_unpackJson($this->get('experiments'), true);
+    }
 
-        return $experiments;
+    /**
+     * Save rewrite rules.
+     *
+     * @param array $rules
+     *
+     * @throws \InstagramAPI\Exception\SettingsException
+     */
+    public function setRewriteRules(
+        array $rules)
+    {
+        $this->set('zr_rules', $this->_packJson($rules));
+    }
+
+    /**
+     * Return saved rewrite rules.
+     *
+     * @throws \InstagramAPI\Exception\SettingsException
+     *
+     * @return array
+     */
+    public function getRewriteRules()
+    {
+        return $this->_unpackJson((string) $this->get('zr_rules'), true);
     }
 
     /**
@@ -722,5 +718,78 @@ class StorageHandler
         }
 
         return $result;
+    }
+
+    /**
+     * Pack data as JSON, deflating it when it saves some space.
+     *
+     * @param array|object $data
+     *
+     * @return string
+     */
+    protected function _packJson(
+        $data)
+    {
+        $json = json_encode($data);
+        $gzipped = base64_encode(zlib_encode($json, ZLIB_ENCODING_DEFLATE, 9));
+        // We must compare gzipped with double encoded JSON.
+        $doubleJson = json_encode($json);
+        if (strlen($gzipped) < strlen($doubleJson)) {
+            $serialized = 'Z'.$gzipped;
+        } else {
+            $serialized = 'J'.$json;
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * Unpacks data from JSON encoded string, inflating it when necessary.
+     *
+     * @param string $packed
+     * @param bool   $assoc
+     *
+     * @return array|object
+     */
+    protected function _unpackJson(
+        $packed,
+        $assoc = true)
+    {
+        if ($packed === null || $packed === '') {
+            return $assoc ? [] : new \stdClass();
+        }
+        $format = $packed[0];
+        $packed = substr($packed, 1);
+
+        try {
+            switch ($format) {
+                case 'Z':
+                    $packed = base64_decode($packed, true);
+                    if ($packed === false) {
+                        throw new \RuntimeException('Invalid Base64 encoded string.');
+                    }
+                    $json = @zlib_decode($packed);
+                    if ($json === false) {
+                        throw new \RuntimeException('Invalid zlib encoded string.');
+                    }
+                    break;
+                case 'J':
+                    $json = $packed;
+                    break;
+                default:
+                    throw new \RuntimeException('Invalid packed type.');
+            }
+            $data = json_decode($json, $assoc);
+            if ($assoc && !is_array($data)) {
+                throw new \RuntimeException('JSON is not an array.');
+            }
+            if (!$assoc && !is_object($data)) {
+                throw new \RuntimeException('JSON is not an object.');
+            }
+        } catch (\RuntimeException $e) {
+            $data = $assoc ? [] : new \stdClass();
+        }
+
+        return $data;
     }
 }

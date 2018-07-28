@@ -165,8 +165,9 @@ class People extends RequestCollection
     public function getBootstrapUsers()
     {
         $surfaces = [
+            'coefficient_direct_closed_friends_ranking',
             'coefficient_direct_recipients_ranking_variant_2',
-            'coefficient_direct_recipients_ranking',
+            'coefficient_rank_recipient_user_suggestion',
             'coefficient_ios_section_test_bootstrap_ranking',
             'autocomplete_user_list',
         ];
@@ -672,7 +673,7 @@ class People extends RequestCollection
      *
      * @throws \InstagramAPI\Exception\InstagramException
      *
-     * @return \InstagramAPI\Response\FavoriteResponse
+     * @return \InstagramAPI\Response\GenericResponse
      */
     public function favorite(
         $userId)
@@ -682,7 +683,7 @@ class People extends RequestCollection
             ->addPost('_uid', $this->ig->account_id)
             ->addPost('_csrftoken', $this->ig->client->getToken())
             ->addPost('user_id', $userId)
-            ->getResponse(new Response\FavoriteResponse());
+            ->getResponse(new Response\GenericResponse());
     }
 
     /**
@@ -692,7 +693,7 @@ class People extends RequestCollection
      *
      * @throws \InstagramAPI\Exception\InstagramException
      *
-     * @return \InstagramAPI\Response\FavoriteResponse
+     * @return \InstagramAPI\Response\GenericResponse
      */
     public function unfavorite(
         $userId)
@@ -702,7 +703,47 @@ class People extends RequestCollection
             ->addPost('_uid', $this->ig->account_id)
             ->addPost('_csrftoken', $this->ig->client->getToken())
             ->addPost('user_id', $userId)
-            ->getResponse(new Response\FavoriteResponse());
+            ->getResponse(new Response\GenericResponse());
+    }
+
+    /**
+     * Turn on story notifications.
+     *
+     * @param string $userId Numerical UserPK ID.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\GenericResponse
+     */
+    public function favoriteForStories(
+        $userId)
+    {
+        return $this->ig->request("friendships/favorite_for_stories/{$userId}/")
+            ->addPost('_uuid', $this->ig->uuid)
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->addPost('user_id', $userId)
+            ->getResponse(new Response\GenericResponse());
+    }
+
+    /**
+     * Turn off story notifications.
+     *
+     * @param string $userId Numerical UserPK ID.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\GenericResponse
+     */
+    public function unfavoriteForStories(
+        $userId)
+    {
+        return $this->ig->request("friendships/unfavorite_for_stories/{$userId}/")
+            ->addPost('_uuid', $this->ig->uuid)
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->addPost('user_id', $userId)
+            ->getResponse(new Response\GenericResponse());
     }
 
     /**
@@ -748,6 +789,90 @@ class People extends RequestCollection
             ->addPost('_csrftoken', $this->ig->client->getToken())
             ->addPost('user_id', $userId)
             ->getResponse(new Response\FriendshipResponse());
+    }
+
+    /**
+     * Mute stories, posts or both from a user.
+     *
+     * It prevents user media from showing up in the timeline and/or story feed.
+     *
+     * @param string $userId Numerical UserPK ID.
+     * @param string $option Selection of what type of media are going to be muted.
+     *                       Available options: 'story', 'post' or 'all'.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\FriendshipResponse
+     */
+    public function muteUserMedia(
+        $userId,
+        $option)
+    {
+        return $this->_muteOrUnmuteUserMedia($userId, $option, 'friendships/mute_posts_or_story_from_follow/');
+    }
+
+    /**
+     * Unmute stories, posts or both from a user.
+     *
+     * @param string $userId Numerical UserPK ID.
+     * @param string $option Selection of what type of media are going to be muted.
+     *                       Available options: 'story', 'post' or 'all'.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\FriendshipResponse
+     */
+    public function unmuteUserMedia(
+        $userId,
+        $option)
+    {
+        return $this->_muteOrUnmuteUserMedia($userId, $option, 'friendships/unmute_posts_or_story_from_follow/');
+    }
+
+    /**
+     * Helper function to mute user media.
+     *
+     * @param string $userId   Numerical UserPK ID.
+     * @param string $option   Selection of what type of media are going to be muted.
+     *                         Available options: 'story', 'post' or 'all'.
+     * @param string $endpoint API endpoint for muting/unmuting user media.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\FriendshipResponse
+     *
+     * @see People::muteUserMedia()
+     * @see People::unmuteUserMedia()
+     */
+    protected function _muteOrUnmuteUserMedia(
+        $userId,
+        $option,
+        $endpoint)
+    {
+        $request = $this->ig->request($endpoint)
+            ->addPost('_uuid', $this->ig->uuid)
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_csrftoken', $this->ig->client->getToken());
+
+        switch ($option) {
+            case 'story':
+                $request->addPost('target_reel_author_id', $userId);
+                break;
+            case 'post':
+                $request->addPost('target_posts_author_id', $userId);
+                break;
+            case 'all':
+                $request->addPost('target_reel_author_id', $userId);
+                $request->addPost('target_posts_author_id', $userId);
+                break;
+            default:
+                throw new \InvalidArgumentException(sprintf('"%s" is not a valid muting option.', $option));
+        }
+
+        return $request->getResponse(new Response\FriendshipResponse());
     }
 
     /**
