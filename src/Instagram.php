@@ -2,6 +2,8 @@
 
 namespace InstagramAPI;
 
+use InstagramAPI\Exception\InstagramException;
+
 /**
  * Instagram's Private API v5.
  *
@@ -1139,6 +1141,72 @@ class Instagram implements ExperimentsInterface
         $this->client->saveCookieJar();
 
         return $response;
+    }
+
+    /**
+     * @return \InstagramAPI\Response\ChallengeResponse
+     * @throws InstagramException
+     */
+    public function confirmItWasMe()
+    {
+        return $this->request('challenge/')
+                    ->setNeedsAuth(false)
+                    ->addPost('choice', 0)
+                    ->addPost('guid', $this->uuid)
+                    ->addPost('_csrftoken', $this->client->getToken())
+                    ->getResponse(new Response\ChallengeResponse());
+    }
+
+    /**
+     * @param     $apiPath
+     * @param int $choice 1 - email, 2 - phone
+     *
+     * @throws InstagramException
+     * @return \InstagramAPI\Response\ChallengeResponse
+     */
+    public function challengeRequired($apiPath, $choice = 1)
+    {
+        if (!is_string($apiPath) || empty($apiPath)) {
+            throw new \InvalidArgumentException('ApiPath must be a non empty string');
+        }
+
+        if (!is_int($choice) || !in_array($choice, [1, 2], true)) {
+            throw new \InvalidArgumentException('Choice must be 1 (email) or 2 (phone)');
+        }
+
+        return $this->request($apiPath)
+                    ->setNeedsAuth(false)
+                    ->addPost('choice', $choice)
+                    ->addPost('guid', $this->uuid)
+                    ->addPost('_csrftoken', $this->client->getToken())
+                    ->getResponse(new Response\ChallengeResponse());
+    }
+
+    /**
+     * @param $apiPath
+     * @param $securityCode
+     *
+     * @throws InstagramException
+     * @return \InstagramAPI\Response\ChallengeResponse
+     */
+    public function finishChallengeRequired($apiPath, $securityCode)
+    {
+        if (!is_string($apiPath) || empty($apiPath)) {
+            throw new \InvalidArgumentException('ApiPath must be a non empty string');
+        }
+
+        $securityCode = (string) $securityCode;
+
+        if (!preg_match('/^\d{6}$/', $securityCode)) {
+            throw new \InvalidArgumentException('SecurityCode must be a string containing 6 digits');
+        }
+
+        return $this->request($apiPath)
+                    ->setNeedsAuth(false)
+                    ->addPost('security_code', $securityCode)
+                    ->addPost('guid', $this->uuid)
+                    ->addPost('_csrftoken', $this->client->getToken())
+                    ->getResponse(new Response\ChallengeResponse());
     }
 
     /**
