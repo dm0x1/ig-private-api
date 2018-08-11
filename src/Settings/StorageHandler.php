@@ -493,12 +493,13 @@ class StorageHandler
      *
      * @param string $rawData An encoded string with all cookie data. Use an
      *                        empty string to erase currently stored cookies.
-     *
+     * @param int $maxAttempts Max number of attemps to set cookies
      * @throws \InstagramAPI\Exception\SettingsException
      */
     public function setCookies(
-        $rawData)
+        $rawData, $maxAttempts=10)
     {
+        $attemptNumber = 1;
         $this->_throwIfNoActiveUser();
         $this->_throwIfNotString($rawData);
 
@@ -509,7 +510,15 @@ class StorageHandler
                 // Perform an atomic diskwrite, which prevents accidental
                 // truncation if the script is ever interrupted mid-write.
                 $this->_createCookiesFileDirectory(); // Ensures dir exists.
-                $written = Utils::atomicWrite($this->_cookiesFilePath, $rawData);
+
+                do {
+                    $written = Utils::atomicWrite($this->_cookiesFilePath, $rawData);
+                    $attemptNumber++;
+                    if($written === false) {
+                        usleep(100000);
+                    }
+                } while ($attemptNumber <= $maxAttempts && $written === false);
+
                 if ($written === false) {
                     throw new SettingsException(sprintf(
                         'The "%s" cookie file is not writable.',
