@@ -32,6 +32,48 @@ class Hashtag extends RequestCollection
     }
 
     /**
+     * Get hashtags from a section.
+     *
+     * Available tab sections: 'top' and 'recent'.
+     *
+     * @param string     $hashtag      The hashtag, not including the "#".
+     * @param string     $tab          Section tab for hashtags.
+     * @param null|int[] $nextMediaIds Used for pagination.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\TagFeedResponse
+     */
+    public function getSection(
+        $hashtag,
+        $tab,
+        $nextMediaIds = null)
+    {
+        Utils::throwIfInvalidHashtag($hashtag);
+        $urlHashtag = urlencode($hashtag); // Necessary for non-English chars.
+        if ($tab !== 'top' && $tab !== 'recent') {
+            throw new \InvalidArgumentException('Tab section must be \'top\' or \'recent\'.');
+        }
+
+        $request = $this->ig->request("tags/{$urlHashtag}/sections/")
+            ->addPost('_uuid', $this->ig->uuid)
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->addPost('tab', $tab)
+            ->addPost('include_persistent', true);
+
+        if ($nextMediaIds !== null) {
+            if (!is_array($nextMediaIds) || !array_filter($nextMediaIds, 'is_int')) {
+                throw new \InvalidArgumentException('Next media IDs must be an Int[].');
+            }
+            $request->addPost('next_media_ids', $nextMediaIds);
+        }
+
+        return $request->getResponse(new Response\TagFeedResponse());
+    }
+
+    /**
      * Search for hashtags.
      *
      * Gives you search results ordered by best matches first.
