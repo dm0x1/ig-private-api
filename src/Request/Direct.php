@@ -523,7 +523,7 @@ class Direct extends RequestCollection
      * @param array  $recipients An array with "users" or "thread" keys.
      *                           To start a new thread, provide "users" as an array
      *                           of numerical UserPK IDs. To use an existing thread
-     *                           instead, provide "thread" with the thread ID.
+     *                           instead, provide "thread" with the thread ID
      * @param string $mediaId    The media ID in Instagram's internal format (ie "3482384834_43294").
      * @param array  $options    An associative array of additional parameters, including:
      *                           "media_type" (required) - either "photo" or "video";
@@ -1033,7 +1033,8 @@ class Direct extends RequestCollection
      * @param array $recipients An array with "users" or "thread" keys.
      *                          To start a new thread, provide "users" as an array
      *                          of numerical UserPK IDs. To use an existing thread
-     *                          instead, provide "thread" with the thread ID.
+     *                          instead, provide "thread" with the thread ID. To use multiple
+     *                          hreads, provide array of thread IDs
      * @param bool  $useQuotes  Whether to put IDs into quotes.
      *
      * @throws \InvalidArgumentException
@@ -1064,21 +1065,36 @@ class Direct extends RequestCollection
         }
         // thread
         if (isset($recipients['thread'])) {
-            if (!is_scalar($recipients['thread'])) {
-                throw new \InvalidArgumentException('Thread identifier must be scalar.');
-            } elseif (!ctype_digit($recipients['thread']) && (!is_int($recipients['thread']) || $recipients['thread'] < 0)) {
-                throw new \InvalidArgumentException(sprintf('"%s" is not a valid thread identifier.', $recipients['thread']));
+            if (!is_scalar($recipients['thread']) && !is_array($recipients['thread'])) {
+                throw new \InvalidArgumentException('Thread identifier must be scalar or array.');
             }
-            // Although this is an array, you will get "Need to specify thread ID or recipient users." error
-            // if you will try to use more than one thread identifier here.
+
+            if(is_array($recipients['thread'])) {
+                foreach ($recipients['thread'] as $thread) {
+                    if(!ctype_digit($thread) && (!is_int($thread) || $thread < 0)) {
+                        throw new \InvalidArgumentException(sprintf('"%s" is not a valid thread identifier.', $recipients['thread']));
+                    }
+                }
+            } else if(is_scalar($recipients['thread'])) {
+                if (!ctype_digit($recipients['thread']) && (!is_int($recipients['thread']) || $recipients['thread'] < 0)) {
+                    throw new \InvalidArgumentException(sprintf('"%s" is not a valid thread identifier.', $recipients['thread']));
+                }
+            }
+
             if (!$useQuotes) {
                 // We can't use json_encode() here, because thread id must be a number.
-                $result['thread'] = '['.$recipients['thread'].']';
+                if(is_array($recipients['thread'])) {
+                    $result['thread'] = '['. implode(',', $recipients['thread']) .']';
+                } else {
+                    $result['thread'] = '['.$recipients['thread'].']';
+                }
             } else {
                 // We can't use json_encode() here, because thread id must be a string.
                 $result['thread'] = '["'.$recipients['thread'].'"]';
             }
+
         }
+
         if (!count($result)) {
             throw new \InvalidArgumentException('Please provide at least one recipient.');
         } elseif (isset($result['thread']) && isset($result['users'])) {
