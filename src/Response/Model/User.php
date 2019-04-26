@@ -7,6 +7,7 @@ use InstagramAPI\AutoPropertyMapper;
 /**
  * User.
  *
+ * @method int getAccountType()
  * @method string getAddressStreet()
  * @method mixed getAggregatePromoteEngagement()
  * @method mixed getAllowContactsSync()
@@ -19,6 +20,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method mixed getBlockAt()
  * @method string getBusinessContactMethod()
  * @method mixed getByline()
+ * @method bool getCanBeReportedAsFraud()
  * @method bool getCanBeTaggedAsSponsor()
  * @method mixed getCanBoostPost()
  * @method bool getCanClaimPage()
@@ -27,7 +29,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getCanCrosspostWithoutFbToken()
  * @method bool getCanFollowHashtag()
  * @method bool getCanLinkEntitiesInBio()
- * @method mixed getCanSeeOrganicInsights()
+ * @method bool getCanSeeOrganicInsights()
  * @method string getCategory()
  * @method ChainingSuggestion[] getChainingSuggestions()
  * @method string getCityId()
@@ -56,10 +58,13 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getHasBiographyTranslation()
  * @method bool getHasChaining()
  * @method bool getHasHighlightReels()
+ * @method bool getHasPlacedOrders()
  * @method bool getHasProfileVideoFeed()
+ * @method bool getHasRecommendAccounts()
  * @method bool getHasUnseenBestiesMedia()
  * @method ImageCandidate getHdProfilePicUrlInfo()
  * @method ImageCandidate[] getHdProfilePicVersions()
+ * @method bool getHighlightReshareDisabled()
  * @method string getId()
  * @method mixed getIncludeDirectBlacklistStatus()
  * @method bool getIsActive()
@@ -70,6 +75,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getIsFavorite()
  * @method bool getIsFavoriteForHighlights()
  * @method bool getIsFavoriteForStories()
+ * @method bool getIsInterestAccount()
  * @method bool getIsNeedy()
  * @method bool getIsPrivate()
  * @method bool getIsProfileActionNeeded()
@@ -78,10 +84,11 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getIsVideoCreator()
  * @method string getLatestReelMedia()
  * @method float getLatitude()
+ * @method string getLiveSubscriptionStatus()
  * @method float getLongitude()
  * @method int getMaxNumLinkedEntitiesInBio()
  * @method int getMediaCount()
- * @method mixed getMutualFollowersCount()
+ * @method int getMutualFollowersCount()
  * @method Nametag getNametag()
  * @method string getNationalNumber()
  * @method mixed getNeedsEmailConfirm()
@@ -102,18 +109,25 @@ use InstagramAPI\AutoPropertyMapper;
  * @method mixed getSchool()
  * @method bool getScreenshotted()
  * @method mixed getSearchSocialContext()
+ * @method string getSearchSubtitle()
+ * @method int getShoppablePostsCount()
+ * @method bool getShowAccountTransparencyDetails()
  * @method bool getShowBestiesBadge()
  * @method bool getShowBusinessConversionIcon()
  * @method bool getShowConversionEditEntry()
  * @method mixed getShowFeedBizConversionIcon()
  * @method bool getShowInsightsTerms()
- * @method string getSocialContext()
+ * @method bool getShowShoppableFeed()
+ * @method mixed getSocialContext()
+ * @method int getTotalArEffects()
+ * @method int getTotalIgtvVideos()
  * @method mixed getUnseenCount()
  * @method string getUserId()
  * @method string getUsername()
  * @method mixed getUsertagReviewEnabled()
  * @method int getUsertagsCount()
  * @method string getZip()
+ * @method bool isAccountType()
  * @method bool isAddressStreet()
  * @method bool isAggregatePromoteEngagement()
  * @method bool isAllowContactsSync()
@@ -126,6 +140,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isBlockAt()
  * @method bool isBusinessContactMethod()
  * @method bool isByline()
+ * @method bool isCanBeReportedAsFraud()
  * @method bool isCanBeTaggedAsSponsor()
  * @method bool isCanBoostPost()
  * @method bool isCanClaimPage()
@@ -163,10 +178,13 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isHasBiographyTranslation()
  * @method bool isHasChaining()
  * @method bool isHasHighlightReels()
+ * @method bool isHasPlacedOrders()
  * @method bool isHasProfileVideoFeed()
+ * @method bool isHasRecommendAccounts()
  * @method bool isHasUnseenBestiesMedia()
  * @method bool isHdProfilePicUrlInfo()
  * @method bool isHdProfilePicVersions()
+ * @method bool isHighlightReshareDisabled()
  * @method bool isId()
  * @method bool isIncludeDirectBlacklistStatus()
  * @method bool isIsActive()
@@ -177,6 +195,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isIsFavorite()
  * @method bool isIsFavoriteForHighlights()
  * @method bool isIsFavoriteForStories()
+ * @method bool isIsInterestAccount()
  * @method bool isIsNeedy()
  * @method bool isIsPrivate()
  * @method bool isIsProfileActionNeeded()
@@ -185,6 +204,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isIsVideoCreator()
  * @method bool isLatestReelMedia()
  * @method bool isLatitude()
+ * @method bool isLiveSubscriptionStatus()
  * @method bool isLongitude()
  * @method bool isMaxNumLinkedEntitiesInBio()
  * @method bool isMediaCount()
@@ -209,18 +229,25 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isSchool()
  * @method bool isScreenshotted()
  * @method bool isSearchSocialContext()
+ * @method bool isSearchSubtitle()
+ * @method bool isShoppablePostsCount()
+ * @method bool isShowAccountTransparencyDetails()
  * @method bool isShowBestiesBadge()
  * @method bool isShowBusinessConversionIcon()
  * @method bool isShowConversionEditEntry()
  * @method bool isShowFeedBizConversionIcon()
  * @method bool isShowInsightsTerms()
+ * @method bool isShowShoppableFeed()
  * @method bool isSocialContext()
+ * @method bool isTotalArEffects()
+ * @method bool isTotalIgtvVideos()
  * @method bool isUnseenCount()
  * @method bool isUserId()
  * @method bool isUsername()
  * @method bool isUsertagReviewEnabled()
  * @method bool isUsertagsCount()
  * @method bool isZip()
+ * @method $this setAccountType(int $value)
  * @method $this setAddressStreet(string $value)
  * @method $this setAggregatePromoteEngagement(mixed $value)
  * @method $this setAllowContactsSync(mixed $value)
@@ -233,6 +260,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setBlockAt(mixed $value)
  * @method $this setBusinessContactMethod(string $value)
  * @method $this setByline(mixed $value)
+ * @method $this setCanBeReportedAsFraud(bool $value)
  * @method $this setCanBeTaggedAsSponsor(bool $value)
  * @method $this setCanBoostPost(mixed $value)
  * @method $this setCanClaimPage(bool $value)
@@ -241,7 +269,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setCanCrosspostWithoutFbToken(bool $value)
  * @method $this setCanFollowHashtag(bool $value)
  * @method $this setCanLinkEntitiesInBio(bool $value)
- * @method $this setCanSeeOrganicInsights(mixed $value)
+ * @method $this setCanSeeOrganicInsights(bool $value)
  * @method $this setCategory(string $value)
  * @method $this setChainingSuggestions(ChainingSuggestion[] $value)
  * @method $this setCityId(string $value)
@@ -270,10 +298,13 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setHasBiographyTranslation(bool $value)
  * @method $this setHasChaining(bool $value)
  * @method $this setHasHighlightReels(bool $value)
+ * @method $this setHasPlacedOrders(bool $value)
  * @method $this setHasProfileVideoFeed(bool $value)
+ * @method $this setHasRecommendAccounts(bool $value)
  * @method $this setHasUnseenBestiesMedia(bool $value)
  * @method $this setHdProfilePicUrlInfo(ImageCandidate $value)
  * @method $this setHdProfilePicVersions(ImageCandidate[] $value)
+ * @method $this setHighlightReshareDisabled(bool $value)
  * @method $this setId(string $value)
  * @method $this setIncludeDirectBlacklistStatus(mixed $value)
  * @method $this setIsActive(bool $value)
@@ -284,6 +315,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setIsFavorite(bool $value)
  * @method $this setIsFavoriteForHighlights(bool $value)
  * @method $this setIsFavoriteForStories(bool $value)
+ * @method $this setIsInterestAccount(bool $value)
  * @method $this setIsNeedy(bool $value)
  * @method $this setIsPrivate(bool $value)
  * @method $this setIsProfileActionNeeded(bool $value)
@@ -292,10 +324,11 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setIsVideoCreator(bool $value)
  * @method $this setLatestReelMedia(string $value)
  * @method $this setLatitude(float $value)
+ * @method $this setLiveSubscriptionStatus(string $value)
  * @method $this setLongitude(float $value)
  * @method $this setMaxNumLinkedEntitiesInBio(int $value)
  * @method $this setMediaCount(int $value)
- * @method $this setMutualFollowersCount(mixed $value)
+ * @method $this setMutualFollowersCount(int $value)
  * @method $this setNametag(Nametag $value)
  * @method $this setNationalNumber(string $value)
  * @method $this setNeedsEmailConfirm(mixed $value)
@@ -316,18 +349,25 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setSchool(mixed $value)
  * @method $this setScreenshotted(bool $value)
  * @method $this setSearchSocialContext(mixed $value)
+ * @method $this setSearchSubtitle(string $value)
+ * @method $this setShoppablePostsCount(int $value)
+ * @method $this setShowAccountTransparencyDetails(bool $value)
  * @method $this setShowBestiesBadge(bool $value)
  * @method $this setShowBusinessConversionIcon(bool $value)
  * @method $this setShowConversionEditEntry(bool $value)
  * @method $this setShowFeedBizConversionIcon(mixed $value)
  * @method $this setShowInsightsTerms(bool $value)
- * @method $this setSocialContext(string $value)
+ * @method $this setShowShoppableFeed(bool $value)
+ * @method $this setSocialContext(mixed $value)
+ * @method $this setTotalArEffects(int $value)
+ * @method $this setTotalIgtvVideos(int $value)
  * @method $this setUnseenCount(mixed $value)
  * @method $this setUserId(string $value)
  * @method $this setUsername(string $value)
  * @method $this setUsertagReviewEnabled(mixed $value)
  * @method $this setUsertagsCount(int $value)
  * @method $this setZip(string $value)
+ * @method $this unsetAccountType()
  * @method $this unsetAddressStreet()
  * @method $this unsetAggregatePromoteEngagement()
  * @method $this unsetAllowContactsSync()
@@ -340,6 +380,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetBlockAt()
  * @method $this unsetBusinessContactMethod()
  * @method $this unsetByline()
+ * @method $this unsetCanBeReportedAsFraud()
  * @method $this unsetCanBeTaggedAsSponsor()
  * @method $this unsetCanBoostPost()
  * @method $this unsetCanClaimPage()
@@ -377,10 +418,13 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetHasBiographyTranslation()
  * @method $this unsetHasChaining()
  * @method $this unsetHasHighlightReels()
+ * @method $this unsetHasPlacedOrders()
  * @method $this unsetHasProfileVideoFeed()
+ * @method $this unsetHasRecommendAccounts()
  * @method $this unsetHasUnseenBestiesMedia()
  * @method $this unsetHdProfilePicUrlInfo()
  * @method $this unsetHdProfilePicVersions()
+ * @method $this unsetHighlightReshareDisabled()
  * @method $this unsetId()
  * @method $this unsetIncludeDirectBlacklistStatus()
  * @method $this unsetIsActive()
@@ -391,6 +435,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetIsFavorite()
  * @method $this unsetIsFavoriteForHighlights()
  * @method $this unsetIsFavoriteForStories()
+ * @method $this unsetIsInterestAccount()
  * @method $this unsetIsNeedy()
  * @method $this unsetIsPrivate()
  * @method $this unsetIsProfileActionNeeded()
@@ -399,6 +444,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetIsVideoCreator()
  * @method $this unsetLatestReelMedia()
  * @method $this unsetLatitude()
+ * @method $this unsetLiveSubscriptionStatus()
  * @method $this unsetLongitude()
  * @method $this unsetMaxNumLinkedEntitiesInBio()
  * @method $this unsetMediaCount()
@@ -423,12 +469,18 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetSchool()
  * @method $this unsetScreenshotted()
  * @method $this unsetSearchSocialContext()
+ * @method $this unsetSearchSubtitle()
+ * @method $this unsetShoppablePostsCount()
+ * @method $this unsetShowAccountTransparencyDetails()
  * @method $this unsetShowBestiesBadge()
  * @method $this unsetShowBusinessConversionIcon()
  * @method $this unsetShowConversionEditEntry()
  * @method $this unsetShowFeedBizConversionIcon()
  * @method $this unsetShowInsightsTerms()
+ * @method $this unsetShowShoppableFeed()
  * @method $this unsetSocialContext()
+ * @method $this unsetTotalArEffects()
+ * @method $this unsetTotalIgtvVideos()
  * @method $this unsetUnseenCount()
  * @method $this unsetUserId()
  * @method $this unsetUsername()
@@ -445,6 +497,8 @@ class User extends AutoPropertyMapper
         'is_favorite'                         => 'bool',
         'is_favorite_for_stories'             => 'bool',
         'is_favorite_for_highlights'          => 'bool',
+        'is_interest_account'                 => 'bool',
+        'can_be_reported_as_fraud'            => 'bool',
         'profile_pic_url'                     => 'string',
         'profile_pic_id'                      => 'string',
         'permission'                          => 'bool',
@@ -460,9 +514,10 @@ class User extends AutoPropertyMapper
         'byline'                              => '',
         'search_social_context'               => '',
         'unseen_count'                        => '',
-        'mutual_followers_count'              => '',
+        'mutual_followers_count'              => 'int',
         'follower_count'                      => 'int',
-        'social_context'                      => 'string',
+        'search_subtitle'                     => 'string',
+        'social_context'                      => '',
         'media_count'                         => 'int',
         'following_count'                     => 'int',
         'following_tag_count'                 => 'int',
@@ -478,9 +533,11 @@ class User extends AutoPropertyMapper
         'can_boost_post'                      => '',
         'is_profile_action_needed'            => 'bool',
         'has_chaining'                        => 'bool',
+        'has_recommend_accounts'              => 'bool',
         'chaining_suggestions'                => 'ChainingSuggestion[]',
         'include_direct_blacklist_status'     => '',
-        'can_see_organic_insights'            => '',
+        'can_see_organic_insights'            => 'bool',
+        'has_placed_orders'                   => 'bool',
         'can_convert_to_business'             => 'bool',
         'convert_from_pages'                  => '',
         'show_business_conversion_icon'       => 'bool',
@@ -492,10 +549,13 @@ class User extends AutoPropertyMapper
         'profile_context_mutual_follow_ids'   => 'string[]',
         'profile_context_links_with_user_ids' => 'Link[]',
         'has_biography_translation'           => 'bool',
+        'total_igtv_videos'                   => 'int',
+        'total_ar_effects'                    => 'int',
         'can_link_entities_in_bio'            => 'bool',
         'biography_with_entities'             => 'BiographyEntities',
         'max_num_linked_entities_in_bio'      => 'int',
         'business_contact_method'             => 'string',
+        'highlight_reshare_disabled'          => 'bool',
         /*
          * Business category.
          */
@@ -504,6 +564,7 @@ class User extends AutoPropertyMapper
         'page_name'                           => '',
         'fb_page_call_to_action_id'           => 'string',
         'is_call_to_action_enabled'           => 'bool',
+        'account_type'                        => 'int',
         'public_phone_country_code'           => 'string',
         'public_phone_number'                 => 'string',
         'contact_phone_number'                => 'string',
@@ -534,6 +595,9 @@ class User extends AutoPropertyMapper
         'fb_page_call_to_action_ix_url'       => 'string',
         'can_crosspost_without_fb_token'      => 'bool',
         'fb_page_call_to_action_ix_partner'   => 'string',
+        'shoppable_posts_count'               => 'int',
+        'show_shoppable_feed'                 => 'bool',
+        'show_account_transparency_details'   => 'bool',
         /*
          * Unix "taken_at" timestamp of the newest item in their story reel.
          */
@@ -552,5 +616,6 @@ class User extends AutoPropertyMapper
         'nametag'                             => 'Nametag',
         'school'                              => '',
         'is_bestie'                           => 'bool',
+        'live_subscription_status'            => 'string',
     ];
 }
