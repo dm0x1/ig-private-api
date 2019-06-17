@@ -245,6 +245,7 @@ class Instagram implements ExperimentsInterface
         // use an intermediary layer such as a database or a permanent process!
         // NOTE: People can disable this safety via the flag at their own risk.
         if (!self::$allowDangerousWebUsageAtMyOwnRisk && (!defined('PHP_SAPI') || PHP_SAPI !== 'cli')) {
+
             // IMPORTANT: We do NOT throw any exception here for users who are
             // running the library via a webpage. Many webservers are configured
             // to hide all PHP errors, and would just give the user a totally
@@ -254,6 +255,7 @@ class Instagram implements ExperimentsInterface
             echo file_get_contents(__DIR__.'/../webwarning.htm');
             echo '<p>If you truly want to enable <em>incorrect</em> website usage by directly embedding this application emulator library in your page, then you can do that <strong>AT YOUR OWN RISK</strong> by setting the following flag <em>before</em> you create the <code>Instagram()</code> object:</p>'.PHP_EOL;
             echo '<p><code>\InstagramAPI\Instagram::$allowDangerousWebUsageAtMyOwnRisk = true;</code></p>'.PHP_EOL;
+
             exit(0); // Exit without error to avoid triggering Error 500.
         }
 

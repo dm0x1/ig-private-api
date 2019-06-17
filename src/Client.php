@@ -162,6 +162,11 @@ class Client
         $this->_resetConnection = false;
     }
 
+    public function getGuzzleClient()
+    {
+        return $this->_guzzleClient;
+    }
+
     /**
      * Resets certain Client settings via the current Settings storage.
      *
@@ -328,6 +333,11 @@ class Client
 
         // Reset the "last saved" timestamp to the current time.
         $this->_cookieJarLastSaved = time();
+    }
+
+    public function getCookieJarLastSaved()
+    {
+        return $this->_cookieJarLastSaved;
     }
 
     /**
@@ -807,6 +817,75 @@ class Client
         ]);
 
         return $response;
+    }
+
+    /**
+     * Perform an Instagram API call.
+     *
+     * @param HttpRequestInterface $request       HTTP request to send.
+     * @param array                $guzzleOptions Extra Guzzle options for this request.
+     *
+     * @throws InstagramException
+     *
+     * @return HttpResponseInterface
+     */
+    public function apiAsync(
+        HttpRequestInterface $request,
+        array $guzzleOptions = [])
+    {
+        // Set up headers that are required for every request.
+        $request = modify_request($request, [
+            'set_headers' => [
+                'User-Agent'       => $this->_userAgent,
+                // Keep the API's HTTPS connection alive in Guzzle for future
+                // re-use, to greatly speed up all further queries after this.
+                'Connection'       => 'Keep-Alive',
+                'X-FB-HTTP-Engine' => Constants::X_FB_HTTP_Engine,
+                'Accept'           => '*/*',
+                'Accept-Encoding'  => Constants::ACCEPT_ENCODING,
+                'Accept-Language'  => Constants::ACCEPT_LANGUAGE,
+            ],
+        ]);
+
+        // Check the Content-Type header for debugging.
+        $contentType = $request->getHeader('Content-Type');
+        $isFormData = count($contentType) && reset($contentType) === Constants::CONTENT_TYPE;
+
+        // Perform the API request.
+
+        return [$request, $this->_guzzleRequestOptionsAsync($request, $guzzleOptions)];
+    }
+
+    /**
+     * Wraps Guzzle's request and adds special error handling and options.
+     *
+     * Automatically throws exceptions on certain very serious HTTP errors. And
+     * re-wraps all Guzzle errors to our own internal exceptions instead. You
+     * must ALWAYS use this (or _apiRequest()) instead of the raw Guzzle Client!
+     * However, you can never assume the server response contains what you
+     * wanted. Be sure to validate the API reply too, since Instagram's API
+     * calls themselves may fail with a JSON message explaining what went wrong.
+     *
+     * WARNING: This is a semi-lowlevel handler which only applies critical
+     * options and HTTP connection handling! Most functions will want to call
+     * _apiRequest() instead. An even higher-level handler which takes care of
+     * debugging, server response checking and response decoding!
+     *
+     * @param HttpRequestInterface $request       HTTP request to send.
+     * @param array                $guzzleOptions Extra Guzzle options for this request.
+     *
+     * @throws \InstagramAPI\Exception\NetworkException                For any network/socket related errors.
+     * @throws \InstagramAPI\Exception\ThrottledException              When we're throttled by server.
+     * @throws \InstagramAPI\Exception\RequestHeadersTooLargeException When request is too large.
+     *
+     * @return HttpResponseInterface
+     */
+    protected function _guzzleRequestOptionsAsync(
+        HttpRequestInterface $request,
+        array $guzzleOptions = [])
+    {
+        // Add critically important options for authenticating the request.
+        return $this->_buildGuzzleOptions($guzzleOptions);
     }
 
     /**

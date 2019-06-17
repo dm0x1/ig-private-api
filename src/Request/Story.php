@@ -224,6 +224,48 @@ class Story extends RequestCollection
     }
 
     /**
+     * Get multiple users' story feeds (or specific highlight-details) at once.
+     *
+     * NOTE: Normally, you would only use this endpoint for stories (by passing
+     * UserPK IDs as the parameter). But if you're looking at people's highlight
+     * feeds (via `Highlight::getUserFeed()`), you may also sometimes discover
+     * highlight entries that don't have any `items` array. In that case, you
+     * are supposed to get the items for those highlights via this endpoint!
+     * Simply pass their `id` values as the argument to this API to get details.
+     *
+     * @param string|string[] $feedList List of numerical UserPK IDs, OR highlight IDs (such as `highlight:123882132324123`).
+     * @param string          $source   (optional) Source app-module where the request was made.
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\ReelsMediaResponse
+     *
+     * @see Highlight::getUserFeed() More info about when to use this API for highlight-details.
+     */
+    public function getReelsMediaFeedAsync(
+        $feedList,
+        $source = 'feed_timeline')
+    {
+        if (!is_array($feedList)) {
+            $feedList = [$feedList];
+        }
+
+        foreach ($feedList as &$value) {
+            $value = (string) $value;
+        }
+        unset($value); // Clear reference.
+
+        return $this->ig->request('feed/reels_media/')
+                        ->addPost('supported_capabilities_new', json_encode(Constants::SUPPORTED_CAPABILITIES))
+                        ->addPost('_uuid', $this->ig->uuid)
+                        ->addPost('_uid', $this->ig->account_id)
+                        ->addPost('_csrftoken', $this->ig->client->getToken())
+                        ->addPost('user_ids', $feedList) // Must be string[] array.
+                        ->addPost('source', $source)
+                        ->getResponseAsync(new Response\ReelsMediaResponse());
+    }
+
+    /**
      * Get your archived story media feed.
      *
      * @throws \InstagramAPI\Exception\InstagramException

@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Stream;
 use InstagramAPI\Exception\InstagramException;
 use InstagramAPI\Exception\LoginRequiredException;
 use Psr\Http\Message\ResponseInterface as HttpResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use function GuzzleHttp\Psr7\stream_for;
 
@@ -762,6 +763,28 @@ class Request
     }
 
     /**
+     * Perform the request and get its raw HTTP response.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws InstagramException
+     *
+     * @return HttpResponseInterface
+     */
+    public function getHttpResponseAsync()
+    {
+        if ($this->_needsAuth) {
+            // Throw if this requires authentication and we're not logged in.
+            $this->_throwIfNotLoggedIn();
+        }
+
+        return $this->_parent->client->apiAsync( // Throws.
+            $this->_buildHttpRequest(), // Throws.
+            $this->_guzzleOptions
+        );
+    }
+
+    /**
      * Return the raw HTTP response body.
      *
      * @throws \InvalidArgumentException
@@ -834,4 +857,22 @@ class Request
 
         return $responseObject;
     }
+
+    /**
+     * Perform the request and map its response data to the provided object.
+     *
+     * @param Response $responseObject An instance of a class object whose properties to fill with the response.
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     * @throws InstagramException
+     *
+     * @return Response The provided responseObject with all JSON properties filled.
+     */
+    public function getResponseAsync(
+        Response $responseObject)
+    {
+        return $this->getHttpResponseAsync();
+    }
+
 }
