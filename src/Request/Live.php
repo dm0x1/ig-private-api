@@ -122,6 +122,38 @@ class Live extends RequestCollection
     }
 
     /**
+     * Get a live broadcast's join request counts.
+     *
+     * Note: This request **will** return null if there have been no pending
+     * join requests have been made. Please have your code check for null.
+     *
+     * @param string $broadcastId    The broadcast ID in Instagram's internal format (ie "17854587811139572").
+     * @param int    $lastTotalCount Last join request count (optional).
+     * @param int    $lastSeenTs     Last seen timestamp (optional).
+     * @param int    $lastFetchTs    Last fetch timestamp (optional).
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\BroadcastJoinRequestCountResponse|null
+     */
+    public function getJoinRequestCounts(
+        $broadcastId,
+        $lastTotalCount = 0,
+        $lastSeenTs = 0,
+        $lastFetchTs = 0)
+    {
+        try {
+            return $this->ig->request("live/{$broadcastId}/get_join_request_counts/")
+                ->addParam('last_total_count', $lastTotalCount)
+                ->addParam('last_seen_ts', $lastSeenTs)
+                ->addParam('last_fetch_ts', $lastFetchTs)
+                ->getResponse(new Response\BroadcastJoinRequestCountResponse());
+        } catch (\InstagramAPI\Exception\EmptyResponseException $e) {
+            return null;
+        }
+    }
+
+    /**
      * Show question in a live broadcast.
      *
      * @param string $broadcastId The broadcast ID in Instagram's internal format (ie "17854587811139572").
@@ -525,14 +557,38 @@ class Live extends RequestCollection
             ->addPost('_csrftoken', $this->ig->client->getToken())
             ->getResponse(new Response\StartLiveResponse());
 
-        $this->ig->request("live/{$broadcastId}/question_status/")
-            ->setSignedPost(false)
-            ->addPost('_csrftoken', $this->ig->client->getToken())
-            ->addPost('_uuid', $this->ig->uuid)
-            ->addPost('allow_question_submission', true)
-            ->getResponse(new Response\GenericResponse());
+        if ($this->ig->isExperimentEnabled('ig_android_live_qa_broadcaster_v1_universe', 'is_enabled')) {
+            $this->ig->request("live/{$broadcastId}/question_status/")
+                ->setSignedPost(false)
+                ->addPost('_csrftoken', $this->ig->client->getToken())
+                ->addPost('_uuid', $this->ig->uuid)
+                ->addPost('allow_question_submission', true)
+                ->getResponse(new Response\GenericResponse());
+        }
 
         return $response;
+    }
+
+    /**
+     * Acknowledges a copyright warning from Instagram after detected via a heartbeat request.
+     *
+     * `NOTE:` It is recommended that you view the `liveBroadcast` example
+     * to see the proper usage of this function.
+     *
+     * @param string $broadcastId The broadcast ID in Instagram's internal format (ie "17854587811139572").
+     *
+     * @throws \InstagramAPI\Exception\InstagramException
+     *
+     * @return \InstagramAPI\Response\GenericResponse
+     */
+    public function resumeBroadcastAfterContentMatch(
+        $broadcastId)
+    {
+        return $this->ig->request("live/{$broadcastId}/resume_broadcast_after_content_match/")
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_uuid', $this->ig->uuid)
+            ->getResponse(new Response\GenericResponse());
     }
 
     /**
@@ -541,7 +597,8 @@ class Live extends RequestCollection
      * `NOTE:` To end your broadcast, you MUST use the `broadcast_id` value
      * which was assigned to you in the `create()` response.
      *
-     * @param string $broadcastId The broadcast ID in Instagram's internal format (ie "17854587811139572").
+     * @param string $broadcastId      The broadcast ID in Instagram's internal format (ie "17854587811139572").
+     * @param bool   $copyrightWarning True when broadcast is ended via a copyright notice (optional).
      *
      * @throws \InstagramAPI\Exception\InstagramException
      *
@@ -551,13 +608,14 @@ class Live extends RequestCollection
      * @see Live::start()
      */
     public function end(
-        $broadcastId)
+        $broadcastId,
+        $copyrightWarning = false)
     {
         return $this->ig->request("live/{$broadcastId}/end_broadcast/")
             ->addPost('_uid', $this->ig->account_id)
             ->addPost('_uuid', $this->ig->uuid)
             ->addPost('_csrftoken', $this->ig->client->getToken())
-            ->addPost('end_after_copyright_warning', 'false') // TODO: Understand what this means
+            ->addPost('end_after_copyright_warning', $copyrightWarning)
             ->getResponse(new Response\GenericResponse());
     }
 

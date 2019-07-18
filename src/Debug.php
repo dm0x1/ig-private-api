@@ -47,8 +47,8 @@ class Debug
         } else {
             $res = 'RESPONSE: ';
         }
-        if ($truncated && strlen($response) > 1000) {
-            $response = substr($response, 0, 1000).'...';
+        if ($truncated && mb_strlen($response, 'utf8') > 1000) {
+            $response = mb_substr($response, 0, 1000, 'utf8').'...';
         }
         echo $res.$response."\n\n";
     }
@@ -56,11 +56,12 @@ class Debug
     public static function printPostData(
         $post)
     {
+        $gzip = mb_strpos($post, "\x1f"."\x8b"."\x08", 0, 'US-ASCII') === 0;
         if (PHP_SAPI === 'cli') {
-            $dat = Utils::colouredString('DATA: ', 'yellow');
+            $dat = Utils::colouredString(($gzip ? 'DECODED ' : '').'DATA: ', 'yellow');
         } else {
             $dat = 'DATA: ';
         }
-        echo $dat.urldecode($post)."\n";
+        echo $dat.urldecode(($gzip ? zlib_decode($post) : $post))."\n";
     }
 }
