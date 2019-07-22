@@ -16,8 +16,19 @@ $ig = new \InstagramAPI\Instagram($debug, $truncatedDebug);
 
 try {
     $ig->login($username, $password);
+} catch (\InstagramAPI\Exception\ChallengeRequiredException $exception) {
+    $apiPath = $exception->getResponse()->asArray()['challenge']['api_path'];
+    $apiPath = mb_substr($apiPath, 1);
+
+    $ig->request($apiPath)
+       ->setNeedsAuth(false)
+       ->setSignedGet()
+        ->addParam('_csrftoken', $ig->client->getToken())
+        ->addParam('guid', $ig->uuid)->getDecodedResponse();
+    exit(0);
 } catch (\Exception $e) {
     echo 'Something went wrong: '.$e->getMessage()."\n";
+
     exit(0);
 }
 

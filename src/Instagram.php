@@ -498,15 +498,16 @@ class Instagram implements ExperimentsInterface
             try {
                 $response = $this->request('accounts/login/')
                     ->setNeedsAuth(false)
+                    ->addPost('country_codes', '[{"country_code":"7","source":["default","sim"]}]')
                     ->addPost('phone_id', $this->phone_id)
                     ->addPost('_csrftoken', $this->client->getToken())
                     ->addPost('username', $this->username)
                     ->addPost('adid', $this->advertising_id)
                     ->addPost('guid', $this->uuid)
                     ->addPost('device_id', $this->device_id)
-                    ->addPost('password', $this->password)
                     ->addPost('google_tokens', '[]')
-                    ->addPost('login_attempt_count', 0)
+                    ->addPost('password', $this->password)
+                    ->addPost('login_attempt_count', "1")
                     ->getResponse(new Response\LoginResponse());
             } catch (\InstagramAPI\Exception\InstagramException $e) {
                 if ($e->hasResponse() && $e->getResponse()->isTwoFactorRequired()) {
@@ -943,18 +944,35 @@ class Instagram implements ExperimentsInterface
      */
     protected function _sendPreLoginFlow()
     {
+        $this->getPrefillCandidates();
+
         // Reset zero rating rewrite rules.
         $this->client->zeroRating()->reset();
         // Calling this non-token API will put a csrftoken in our cookie
         // jar. We must do this before any functions that require a token.
-        $this->internal->readMsisdnHeader('ig_select_app');
+        $this->internal->readMsisdnHeader('default');
+        $this->internal->bootstrapMsisdnHeader();
+
         $this->internal->syncDeviceFeatures(true);
+        $this->internal->bootstrapMsisdnHeader();
         $this->internal->sendLauncherSync(true);
         $this->internal->logAttribution();
         // We must fetch new token here, because it updates rewrite rules.
         $this->internal->fetchZeroRatingToken();
         // It must be at the end, because it's called when a user taps on login input.
         $this->account->setContactPointPrefill('prefill');
+    }
+
+    protected function getPrefillCandidates()
+    {
+        $request = $this->request('accounts/get_prefill_candidates/')
+                            ->setNeedsAuth(false)
+                            ->setSignedPost()
+                            ->addPost('android_device_id', $this->device_id)
+                            ->addPost('usages', "[\"account_recovery_omnibox\"]")
+                            ->addPost('device_id', $this->uuid);
+
+        return $request->getDecodedResponse();
     }
 
     /**

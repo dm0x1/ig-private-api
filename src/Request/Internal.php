@@ -1161,8 +1161,7 @@ class Internal extends RequestCollection
             ->setNeedsAuth(false)
             ->addPost('mobile_subno_usage', $usage)
             // UUID is used as device_id intentionally.
-            ->addPost('device_id', $this->ig->uuid)
-            ->addPost('_csrftoken', $this->ig->client->getToken());
+            ->addPost('device_id', $this->ig->uuid);
 
         return $request->getResponse(new Response\MsisdnHeaderResponse());
     }
