@@ -5,7 +5,7 @@ namespace InstagramAPI;
 use InstagramAPI\Exception\InstagramException;
 
 /**
- * Instagram's Private API v6.1.0.
+ * Instagram's Private API v7.0.1.
  *
  * TERMS OF USE:
  * - This code is in no way affiliated with, authorized, maintained, sponsored
@@ -245,7 +245,6 @@ class Instagram implements ExperimentsInterface
         // use an intermediary layer such as a database or a permanent process!
         // NOTE: People can disable this safety via the flag at their own risk.
         if (!self::$allowDangerousWebUsageAtMyOwnRisk && (!defined('PHP_SAPI') || PHP_SAPI !== 'cli')) {
-
             // IMPORTANT: We do NOT throw any exception here for users who are
             // running the library via a webpage. Many webservers are configured
             // to hide all PHP errors, and would just give the user a totally
@@ -255,7 +254,6 @@ class Instagram implements ExperimentsInterface
             echo file_get_contents(__DIR__.'/../webwarning.htm');
             echo '<p>If you truly want to enable <em>incorrect</em> website usage by directly embedding this application emulator library in your page, then you can do that <strong>AT YOUR OWN RISK</strong> by setting the following flag <em>before</em> you create the <code>Instagram()</code> object:</p>'.PHP_EOL;
             echo '<p><code>\InstagramAPI\Instagram::$allowDangerousWebUsageAtMyOwnRisk = true;</code></p>'.PHP_EOL;
-
             exit(0); // Exit without error to avoid triggering Error 500.
         }
 
@@ -498,15 +496,15 @@ class Instagram implements ExperimentsInterface
             try {
                 $response = $this->request('accounts/login/')
                     ->setNeedsAuth(false)
-                    ->addPost('country_codes', '[{"country_code":"7","source":["default","sim"]}]')
+                    ->addPost('country_codes', '[{"country_code":"1","source":["default","sim"]}]')
                     ->addPost('phone_id', $this->phone_id)
                     ->addPost('_csrftoken', $this->client->getToken())
                     ->addPost('username', $this->username)
                     ->addPost('adid', $this->advertising_id)
                     ->addPost('guid', $this->uuid)
                     ->addPost('device_id', $this->device_id)
-                    ->addPost('google_tokens', '[]')
                     ->addPost('password', $this->password)
+                    ->addPost('google_tokens', '[]')
                     ->addPost('login_attempt_count', "1")
                     ->getResponse(new Response\LoginResponse());
             } catch (\InstagramAPI\Exception\InstagramException $e) {
@@ -598,6 +596,7 @@ class Instagram implements ExperimentsInterface
             // 1 - SMS, 2 - Backup codes, 3 - TOTP, 0 - ??
             ->addPost('verification_method', $verificationMethod)
             ->addPost('verification_code', $verificationCode)
+            ->addPost('trust_this_device', 1)
             ->addPost('two_factor_identifier', $twoFactorIdentifier)
             ->addPost('_csrftoken', $this->client->getToken())
             ->addPost('username', $username)
@@ -944,35 +943,22 @@ class Instagram implements ExperimentsInterface
      */
     protected function _sendPreLoginFlow()
     {
-        $this->getPrefillCandidates();
-
         // Reset zero rating rewrite rules.
         $this->client->zeroRating()->reset();
         // Calling this non-token API will put a csrftoken in our cookie
         // jar. We must do this before any functions that require a token.
-        $this->internal->readMsisdnHeader('default');
-        $this->internal->bootstrapMsisdnHeader();
-
-        $this->internal->syncDeviceFeatures(true);
-        $this->internal->bootstrapMsisdnHeader();
-        $this->internal->sendLauncherSync(true);
-        $this->internal->logAttribution();
-        // We must fetch new token here, because it updates rewrite rules.
         $this->internal->fetchZeroRatingToken();
-        // It must be at the end, because it's called when a user taps on login input.
+        $this->internal->bootstrapMsisdnHeader();
+        $this->internal->readMsisdnHeader('default');
+        $this->internal->syncDeviceFeatures(true);
+        $this->internal->sendLauncherSync(true);
+        $this->internal->bootstrapMsisdnHeader();
+        $this->internal->logAttribution();
+        $this->account->getPrefillCandidates();
+        $this->internal->readMsisdnHeader('default', true);
         $this->account->setContactPointPrefill('prefill');
-    }
-
-    protected function getPrefillCandidates()
-    {
-        $request = $this->request('accounts/get_prefill_candidates/')
-                            ->setNeedsAuth(false)
-                            ->setSignedPost()
-                            ->addPost('android_device_id', $this->device_id)
-                            ->addPost('usages', "[\"account_recovery_omnibox\"]")
-                            ->addPost('device_id', $this->uuid);
-
-        return $request->getDecodedResponse();
+        $this->internal->sendLauncherSync(true, true, true);
+        $this->internal->syncDeviceFeatures(true, true);
     }
 
     /**
@@ -1072,32 +1058,38 @@ class Instagram implements ExperimentsInterface
             // Reset zero rating rewrite rules.
             $this->client->zeroRating()->reset();
             // Perform the "user has just done a full login" API flow.
-            $this->internal->sendLauncherSync(false);
-            $this->internal->syncUserFeatures();
-            $this->timeline->getTimelineFeed(null, ['recovered_from_crash' => true]);
-            $this->story->getReelsTrayFeed();
-            $this->discover->getSuggestedSearches('users');
-            $this->discover->getRecentSearches();
-            $this->discover->getSuggestedSearches('blended');
-            //$this->story->getReelsMediaFeed();
-            // We must fetch new token here, because it updates rewrite rules.
+            $this->account->getAccountFamily();
+            $this->internal->sendLauncherSync(false, false, true);
             $this->internal->fetchZeroRatingToken();
-            $this->_registerPushChannels();
-            $this->direct->getRankedRecipients('reshare', true);
-            $this->direct->getRankedRecipients('raven', true);
-            $this->direct->getInbox();
-            //$this->internal->logResurrectAttribution();
-            $this->direct->getPresences();
+            $this->internal->syncUserFeatures();
+            $this->timeline->getTimelineFeed();
+            $this->story->getReelsTrayFeed('cold_start');
+            $this->internal->sendLauncherSync(false, false, true, true);
+            $this->story->getReelsMediaFeed($this->account_id);
             $this->people->getRecentActivityInbox();
+            //TODO: Figure out why this isn't sending...
+//            $this->internal->logResurrectAttribution();
             $this->internal->getLoomFetchConfig();
-            $this->internal->getProfileNotice();
-            $this->media->getBlockedMedia();
-            //$this->account->getProcessContactPointSignals();
+            $this->internal->getDeviceCapabilitiesDecisions();
             $this->people->getBootstrapUsers();
-            //$this->internal->getQPCooldowns();
-            $this->discover->getExploreFeed(null, true);
-            //$this->internal->getMegaphoneLog();
+            $this->people->getInfoById($this->account_id);
+            $this->account->getLinkageStatus();
+            $this->creative->sendSupportedCapabilities();
+            $this->media->getBlockedMedia();
+            $this->internal->storeClientPushPermissions();
+            $this->internal->getQPCooldowns();
+            $this->_registerPushChannels();
+            $this->story->getReelsMediaFeed($this->account_id);
+            $this->discover->getExploreFeed(null, null, true);
             $this->internal->getQPFetch();
+            $this->account->getProcessContactPointSignals();
+            $this->internal->getArlinkDownloadInfo();
+            $this->_registerPushChannels();
+            $this->people->getSharePrefill();
+            $this->direct->getPresences();
+            $this->direct->getInbox();
+            $this->direct->getInbox(null, 20, 10);
+            $this->_registerPushChannels();
             $this->internal->getFacebookOTA();
         } else {
             $lastLoginTime = $this->settings->get('last_login');
@@ -1105,37 +1097,41 @@ class Instagram implements ExperimentsInterface
 
             // Act like a real logged in app client refreshing its news timeline.
             // This also lets us detect if we're still logged in with a valid session.
-            try {
+            if ($isSessionExpired) {
+                // Act like a real logged in app client refreshing its news timeline.
+                // This also lets us detect if we're still logged in with a valid session.
+                try {
+                    $this->story->getReelsTrayFeed('cold_start');
+                } catch (\InstagramAPI\Exception\LoginRequiredException $e) {
+                    // If our session cookies are expired, we were now told to login,
+                    // so handle that by running a forced relogin in that case!
+                    return $this->_login($this->username, $this->password, true, $appRefreshInterval);
+                }
                 $this->timeline->getTimelineFeed(null, [
                     'is_pull_to_refresh' => $isSessionExpired ? null : mt_rand(1, 3) < 3,
                 ]);
-            } catch (\InstagramAPI\Exception\LoginRequiredException $e) {
-                // If our session cookies are expired, we were now told to login,
-                // so handle that by running a forced relogin in that case!
-                return $this->_login($this->username, $this->password, true, $appRefreshInterval);
-            }
+                $this->people->getSharePrefill();
+                $this->people->getRecentActivityInbox();
 
-            // Perform the "user has returned to their already-logged in app,
-            // so refresh all feeds to check for news" API flow.
-            if ($isSessionExpired) {
+                $this->people->getSharePrefill();
+                $this->people->getRecentActivityInbox();
+                $this->people->getInfoById($this->account_id);
+                $this->internal->getDeviceCapabilitiesDecisions();
+                $this->direct->getPresences();
+                $this->discover->getExploreFeed();
+                $this->direct->getInbox();
+
                 $this->settings->set('last_login', time());
-
                 // Generate and save a new application session ID.
-                $this->session_id = Signatures::generateUUID(true);
+                $this->session_id = Signatures::generateUUID();
                 $this->settings->set('session_id', $this->session_id);
-
                 // Do the rest of the "user is re-opening the app" API flow...
-                $this->people->getBootstrapUsers();
-                $this->story->getReelsTrayFeed();
+                $this->tv->getTvGuide();
+
+                $this->internal->getLoomFetchConfig();
                 $this->direct->getRankedRecipients('reshare', true);
                 $this->direct->getRankedRecipients('raven', true);
                 $this->_registerPushChannels();
-                //$this->internal->getMegaphoneLog();
-                $this->direct->getInbox();
-                $this->direct->getPresences();
-                $this->people->getRecentActivityInbox();
-                $this->internal->getProfileNotice();
-                $this->discover->getExploreFeed();
             }
 
             // Users normally resume their sessions, meaning that their
@@ -1158,6 +1154,8 @@ class Instagram implements ExperimentsInterface
         // cookies to the storage, to ensure that the storage doesn't miss them
         // in case something bad happens to PHP after this moment.
         $this->client->saveCookieJar();
+
+        return null;
     }
 
     /**

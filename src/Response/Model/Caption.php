@@ -18,7 +18,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getShareEnabled()
  * @method mixed getStatus()
  * @method string getText()
- * @method int getType()
+ * @method mixed getType()
  * @method User getUser()
  * @method string getUserId()
  * @method bool isBitFlags()
@@ -46,7 +46,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setShareEnabled(bool $value)
  * @method $this setStatus(mixed $value)
  * @method $this setText(string $value)
- * @method $this setType(int $value)
+ * @method $this setType(mixed $value)
  * @method $this setUser(User $value)
  * @method $this setUserId(string $value)
  * @method $this unsetBitFlags()
@@ -75,11 +75,11 @@ class Caption extends AutoPropertyMapper
         'user'               => 'User',
         'content_type'       => '',
         'text'               => 'string',
+        'share_enabled'      => 'bool',
         'media_id'           => 'string',
         'pk'                 => 'string',
-        'type'               => 'int',
+        'type'               => '',
         'has_translation'    => 'bool',
         'did_report_as_spam' => 'bool',
-        'share_enabled'      => 'bool',
     ];
 }
