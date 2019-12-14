@@ -1811,6 +1811,9 @@ class Internal extends RequestCollection
                     'ig_android_sidecar_photo_fbupload_universe',
                     'is_enabled_fbupload_sidecar_photo');
                 break;
+            case Constants::FEED_STORY:
+                $result = true;
+                break;
             default:
                 $result = $this->ig->isExperimentEnabled(
                     'ig_android_photo_fbupload_universe',
