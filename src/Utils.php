@@ -1136,7 +1136,7 @@ class Utils
         array $storySticker,
         $type)
     {
-        $requiredKeys = ['x', 'y', 'width', 'height', 'rotation'];
+        $requiredKeys = ['x', 'y', 'width', 'height', 'rotation', 'font_size', 'scale', 'z', 'is_sticker', 'display_type'];
 
         // Ensure that all required hashtag array keys exist.
         $missingKeys = array_keys(array_diff_key(['x' => 1, 'y' => 1, 'width' => 1, 'height' => 1, 'rotation' => 0], $storySticker));
