@@ -252,6 +252,8 @@ class Internal extends RequestCollection
             ->addPost('edits',
                 [
                     'crop_original_size'    => [(float) $photoWidth, (float) $photoHeight],
+                    //'crop_original_size'    => [1, 1],
+
                     'crop_zoom'             => 1.0,
                     'crop_center'           => [0.0, -0.0],
                 ])
@@ -267,6 +269,19 @@ class Internal extends RequestCollection
                     'source_width'  => $photoWidth,
                     'source_height' => $photoHeight,
                 ]);
+
+        if($storyMentions !== null) {
+            $request->addPost('device_id', $this->ig->device_id);
+            foreach ($externalMetadata as $k => $v) {
+                if (in_array($k, ['caption', 'mas_opt_in', 'custom_accessibility_caption', 'location', 'location_sticker', 'usertags', 'link', 'hashtags', 'story_mentions', 'story_polls', 'story_sliders', 'story_questions', 'story_countdowns', 'story_fundraisers', 'attached_media', 'product_tags', ])) {
+                    continue;
+                }
+
+                $request->addPost($k, $v);
+            }
+        }
+
+
 
         switch ($targetFeed) {
             case Constants::FEED_TIMELINE:
@@ -325,8 +340,8 @@ class Internal extends RequestCollection
                     Utils::throwIfInvalidStoryMentions($storyMentions);
                     $request
                         ->addPost('reel_mentions', json_encode($storyMentions))
-                        ->addPost('caption', str_replace(' ', '+', $captionText).'+')
-                        ->addPost('mas_opt_in', 'NOT_PROMPTED');
+                        ->addPost('caption', str_replace(' ', '+', $captionText).'+');
+                        //->addPost('mas_opt_in', 'NOT_PROMPTED');
                 }
                 if ($storyPoll !== null) {
                     Utils::throwIfInvalidStoryPoll($storyPoll);
