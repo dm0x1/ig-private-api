@@ -10,6 +10,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool getBlendedInboxEnabled()
  * @method bool getHasOlder()
  * @method DirectCursor getNextCursor()
+ * @method string getOldestCursor()
  * @method DirectCursor getPrevCursor()
  * @method DirectThread[] getThreads()
  * @method int getUnseenCount()
@@ -17,6 +18,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method bool isBlendedInboxEnabled()
  * @method bool isHasOlder()
  * @method bool isNextCursor()
+ * @method bool isOldestCursor()
  * @method bool isPrevCursor()
  * @method bool isThreads()
  * @method bool isUnseenCount()
@@ -24,6 +26,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this setBlendedInboxEnabled(bool $value)
  * @method $this setHasOlder(bool $value)
  * @method $this setNextCursor(DirectCursor $value)
+ * @method $this setOldestCursor(string $value)
  * @method $this setPrevCursor(DirectCursor $value)
  * @method $this setThreads(DirectThread[] $value)
  * @method $this setUnseenCount(int $value)
@@ -31,6 +34,7 @@ use InstagramAPI\AutoPropertyMapper;
  * @method $this unsetBlendedInboxEnabled()
  * @method $this unsetHasOlder()
  * @method $this unsetNextCursor()
+ * @method $this unsetOldestCursor()
  * @method $this unsetPrevCursor()
  * @method $this unsetThreads()
  * @method $this unsetUnseenCount()
@@ -40,6 +44,7 @@ class DirectInbox extends AutoPropertyMapper
 {
     const JSON_PROPERTY_MAP = [
         'has_older'             => 'bool',
+        'oldest_cursor'         => 'string',
         'unseen_count'          => 'int',
         'unseen_count_ts'       => 'string', // Is a timestamp.
         'blended_inbox_enabled' => 'bool',
