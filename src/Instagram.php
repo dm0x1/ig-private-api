@@ -496,7 +496,8 @@ class Instagram implements ExperimentsInterface
             try {
                 $response = $this->request('accounts/login/')
                     ->setNeedsAuth(false)
-                    ->addPost('country_codes', '[{"country_code":"1","source":["default","sim"]}]')
+                    ->addPost('jazoest', Utils::generateJazoest($this->phone_id))
+                    ->addPost('country_codes', '[{"country_code":"1","source":["default"]}]')
                     ->addPost('phone_id', $this->phone_id)
                     ->addPost('_csrftoken', $this->client->getToken())
                     ->addPost('username', $this->username)
@@ -504,6 +505,7 @@ class Instagram implements ExperimentsInterface
                     ->addPost('guid', $this->uuid)
                     ->addPost('device_id', $this->device_id)
                     ->addPost('password', $this->password)
+                    ->addPost('enc_password', Utils::encryptPassword($password, $this->settings->get('public_key_id'), $this->settings->get('public_key')))
                     ->addPost('google_tokens', '[]')
                     ->addPost('login_attempt_count', "1")
                     ->getResponse(new Response\LoginResponse());
@@ -951,7 +953,9 @@ class Instagram implements ExperimentsInterface
         $this->internal->bootstrapMsisdnHeader();
         $this->internal->readMsisdnHeader('default');
         $this->internal->syncDeviceFeatures(true);
-        $this->internal->sendLauncherSync(true);
+        $launcherResponse = $this->internal->sendLauncherSync(true)->getHttpResponse();
+        $this->settings->set('public_key', $launcherResponse->getHeaderLine('ig-set-password-encryption-pub-key'));
+        $this->settings->set('public_key_id', $launcherResponse->getHeaderLine('ig-set-password-encryption-key-id'));
         $this->internal->bootstrapMsisdnHeader();
         $this->internal->logAttribution();
         $this->account->getPrefillCandidates();
