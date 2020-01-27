@@ -1070,7 +1070,7 @@ class Instagram implements ExperimentsInterface
             $this->story->getReelsTrayFeed('cold_start');
             $this->internal->sendLauncherSync(false, false, true, true);
             $this->story->getReelsMediaFeed($this->account_id);
-            $this->people->getRecentActivityInbox();
+            //$this->people->getRecentActivityInbox();
             //TODO: Figure out why this isn't sending...
 //            $this->internal->logResurrectAttribution();
             $this->internal->getLoomFetchConfig();
@@ -1115,10 +1115,10 @@ class Instagram implements ExperimentsInterface
                     'is_pull_to_refresh' => $isSessionExpired ? null : mt_rand(1, 3) < 3,
                 ]);
                 $this->people->getSharePrefill();
-                $this->people->getRecentActivityInbox();
+                //$this->people->getRecentActivityInbox();
 
                 $this->people->getSharePrefill();
-                $this->people->getRecentActivityInbox();
+                //$this->people->getRecentActivityInbox();
                 $this->people->getInfoById($this->account_id);
                 $this->internal->getDeviceCapabilitiesDecisions();
                 $this->direct->getPresences();
