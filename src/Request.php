@@ -2,6 +2,7 @@
 
 namespace InstagramAPI;
 
+use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request as HttpRequest;
 use GuzzleHttp\Psr7\Stream;
@@ -394,6 +395,17 @@ class Request
             $this->_headers['X-IG-Bandwidth-Speed-KBPS'] = '-1.000';
             $this->_headers['X-IG-Bandwidth-TotalBytes-B'] = '0';
             $this->_headers['X-IG-Bandwidth-TotalTime-MS'] = '0';
+
+            $this->_headers['X-IG-App-Locale'] = Constants::USER_AGENT_LOCALE;
+            $this->_headers['X-IG-Device-Locale'] = Constants::USER_AGENT_LOCALE;
+            $this->_headers['X-IG-Device-ID'] = $this->_parent->uuid;
+            $this->_headers['X-Bloks-Is-Layout-RTL'] = 'false';
+            $this->_headers['X-IG-Android-ID'] = $this->_parent->device_id;
+            $this->_headers['X-FB-HTTP-Engine'] = Constants::X_FB_HTTP_Engine;
+
+            if($this->_parent->client->getCookie('mid') instanceof SetCookie) {
+                $this->_headers['X-MID'] = $this->_parent->client->getCookie('mid')->getValue();
+            }
         }
 
         return $this;
